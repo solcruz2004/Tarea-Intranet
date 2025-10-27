@@ -29,6 +29,15 @@ El resultado se guarda como notas Markdown ordenadas por fecha dentro de un "cua
    - `LM_STUDIO_MODEL`: nombre exacto del modelo cargado en LM Studio.
    - Parámetros de Whisper (`WHISPER_MODEL_SIZE`, `WHISPER_COMPUTE_TYPE`, `WHISPER_LANGUAGE`).
    - `NOTES_ROOT`: carpeta donde se guardarán las notas. Si usarás Docker deja `/app/notes`; para la interfaz gráfica local puedes usar `data/notes` o elegir cualquier ruta en tu equipo.
+2. Crea tu archivo `.env` a partir del ejemplo:
+   ```bash
+   cp .env.example .env
+   ```
+3. Ajusta las variables según tus necesidades:
+   - `LM_STUDIO_BASE_URL`: apunta al servidor iniciado desde LM Studio. Si corres Docker en Linux, el valor `http://host.docker.internal:1234/v1` funciona al agregar el `extra_hosts` incluido en `docker-compose.yml`.
+   - `LM_STUDIO_MODEL`: nombre exacto del modelo cargado en LM Studio.
+   - Parámetros de Whisper (`WHISPER_MODEL_SIZE`, `WHISPER_COMPUTE_TYPE`, `WHISPER_LANGUAGE`).
+   - `NOTES_ROOT`: ruta dentro del contenedor donde se escribirán las notas (ya mapeada a `./data/notes`).
 
 4. Inicia LM Studio, carga el modelo deseado y habilita el **Local Inference Server** (menú *Developer -> Local Server*) en el puerto configurado en el `.env`.
 
@@ -88,6 +97,10 @@ Si quieres entregar la aplicación a alguien que solo necesite descargarla y abr
 
 2. Copia tu archivo de audio (mp3, wav, m4a, etc.) a `data/audio/`.
 3. Ejecuta el contenedor con Docker Compose, indicando la ruta del audio dentro del contenedor (`/app/audio/...`):
+## Uso básico
+
+1. Copia tu archivo de audio (mp3, wav, m4a, etc.) a `data/audio/`.
+2. Ejecuta el contenedor con Docker Compose, indicando la ruta del audio dentro del contenedor (`/app/audio/...`):
 
    ```bash
    docker compose run --rm class-notes /app/audio/mi_clase.mp3 --title "Álgebra Lineal" --date 2024-05-20
@@ -100,6 +113,7 @@ Si quieres entregar la aplicación a alguien que solo necesite descargarla y abr
    - `--skip-summary`: salta la llamada a LM Studio y solo crea la transcripción.
 
 4. Una vez finalizado, abre Obsidian y selecciona la carpeta `data/notes` como vault. Encontrarás:
+3. Una vez finalizado, abre Obsidian y selecciona la carpeta `data/notes` como vault. Encontrarás:
    - Notas por fecha en `data/notes/<año>/<mes>/<fecha>-<slug>.md` con el resumen.
    - Transcripciones detalladas en `data/notes/<año>/<mes>/transcripciones/` con tablas por segmento.
 

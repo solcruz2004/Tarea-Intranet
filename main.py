@@ -24,3 +24,7 @@ if __name__ == "__main__":
         _launch_gui()
     else:
         _launch_cli()
+from app.cli import main
+
+if __name__ == "__main__":
+    main()
