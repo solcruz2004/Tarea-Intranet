@@ -23,6 +23,13 @@ La interfaz gráfica incluida verifica y arranca automáticamente todos los serv
 
 - Ninguno: el `.zip` generado incluye los binarios portables de LM Studio y Obsidian junto con la automatización. Solo necesita descomprimirlo y abrir `CuadernoAutomatico.exe`.
 
+## Requisitos previos
+
+1. **Docker y Docker Compose** instalados en tu sistema.
+2. **LM Studio** en tu equipo local, con el servidor OpenAI-compatible habilitado.
+3. **Obsidian** para abrir la carpeta `data/notes` como vault.
+4. (Opcional) GPU compatible para acelerar la transcripción; por defecto se usa CPU.
+
 ## Preparación del entorno
 
 1. Clona este repositorio y entra al directorio.
@@ -39,6 +46,15 @@ La interfaz gráfica incluida verifica y arranca automáticamente todos los serv
    - `NOTES_ROOT`: carpeta donde se guardarán las notas. Si usarás Docker deja `/app/notes`; para la interfaz gráfica local puedes usar `data/notes` o elegir cualquier ruta en tu equipo.
    - `AUTO_BOOTSTRAP_SERVICES` y `LM_STUDIO_START_COMMAND`: permiten que la app intente arrancar LM Studio y Docker por ti (útil para la versión empaquetada).
    - `OBSIDIAN_EXECUTABLE` y `AUTO_OPEN_OBSIDIAN`: controlan la apertura automática del vault cuando termina el procesamiento.
+2. Crea tu archivo `.env` a partir del ejemplo:
+   ```bash
+   cp .env.example .env
+   ```
+3. Ajusta las variables según tus necesidades:
+   - `LM_STUDIO_BASE_URL`: apunta al servidor iniciado desde LM Studio. Si corres Docker en Linux, el valor `http://host.docker.internal:1234/v1` funciona al agregar el `extra_hosts` incluido en `docker-compose.yml`.
+   - `LM_STUDIO_MODEL`: nombre exacto del modelo cargado en LM Studio.
+   - Parámetros de Whisper (`WHISPER_MODEL_SIZE`, `WHISPER_COMPUTE_TYPE`, `WHISPER_LANGUAGE`).
+   - `NOTES_ROOT`: ruta dentro del contenedor donde se escribirán las notas (ya mapeada a `./data/notes`).
 
 4. Inicia LM Studio, carga el modelo deseado y habilita el **Local Inference Server** (menú *Developer -> Local Server*) en el puerto configurado en el `.env`.
 
@@ -61,12 +77,19 @@ Pensado para cualquier persona que prefiera dar clics en lugar de escribir coman
    - En **macOS o Linux**, abre una terminal únicamente para este paso, ejecuta `python3 -m pip install -r requirements.txt` la primera vez y luego `python3 main.py --gui` (puedes crear un alias o acceso directo para no repetir el comando).
 4. En la ventana "Asistente automático de apuntes":
    - Observa el panel derecho; mostrará el estado de LM Studio, Docker y Obsidian en tiempo real.
+2. Completa la sección anterior de **Preparación del entorno** para dejar listo tu archivo `.env` y haber iniciado el servidor local de LM Studio con el modelo deseado.
+3. Abre la carpeta del proyecto y ejecuta la interfaz:
+   - En **Windows**, haz doble clic en `start_gui.bat`. El script instalará automáticamente las dependencias necesarias y abrirá la ventana de la aplicación.
+   - En **macOS o Linux**, abre una terminal únicamente para este paso, ejecuta `python3 -m pip install -r requirements.txt` la primera vez y luego `python3 main.py --gui` (puedes crear un alias o acceso directo para no repetir el comando).
+4. En la ventana "Cuaderno automático de clases":
    - Pulsa **Buscar** para elegir el archivo de audio en cualquier carpeta.
    - Cambia el **Título** o la **Fecha** si lo necesitas.
    - Revisa la **Carpeta de notas** donde se guardarán los apuntes (por defecto `data/notes`). Puedes elegir otra ubicación con **Elegir carpeta**.
    - Marca "Omitir resumen" solo si no quieres llamar a LM Studio y prefieres conservar únicamente la transcripción.
 5. Pulsa **Generar apuntes automáticos** y espera. El registro inferior te mostrará cada paso (carga del modelo, transcripción, resumen, guardado).
 6. Al finalizar se abrirá Obsidian (si se configuró `AUTO_OPEN_OBSIDIAN=true`) y la carpeta que contiene la nota y la transcripción completa.
+5. Pulsa **Generar apuntes** y espera. El registro inferior te mostrará cada paso (carga del modelo, transcripción, resumen, guardado).
+6. Al finalizar se abrirá automáticamente la carpeta que contiene la nota y la transcripción completa para que la agregues a tu vault de Obsidian.
 
 > Consejo: crea un acceso directo a `start_gui.bat` (Windows) o un alias que ejecute `python3 main.py --gui` (macOS/Linux) para iniciar la app con doble clic siempre que tengas un nuevo audio.
 
@@ -81,6 +104,10 @@ Para entregar una experiencia "descargar y usar" debes incluir las versiones por
 2. Revisa `.env.windows.example` y ajusta los valores por defecto que heredará la persona usuaria. El script copiará automáticamente ese archivo como `plantilla.env` en el directorio final.
 3. Abre una terminal de Windows (símbolo del sistema) y navega a la carpeta del proyecto.
 4. Ejecuta el script de empaquetado:
+Si quieres entregar la aplicación a alguien que solo necesite descargarla y abrirla, puedes generar una versión portable para Windows usando PyInstaller. Dentro del repositorio se incluye el script `packaging/windows/package_windows.bat` que automatiza todo el proceso:
+
+1. Abre una terminal de Windows (símbolo del sistema) y navega a la carpeta del proyecto.
+2. Ejecuta el script:
 
    ```bat
    packaging\windows\package_windows.bat
@@ -92,6 +119,13 @@ Para entregar una experiencia "descargar y usar" debes incluir las versiones por
 6. Comprime la carpeta `dist/CuadernoAutomatico` para compartirla. Quien la reciba solo tendrá que descomprimirla, revisar (si desea) el `.env` y ejecutar `CuadernoAutomatico.exe`.
 
 > Consejo: prueba el paquete en una máquina o usuario diferente antes de distribuirlo para verificar permisos de firewall y rutas relativas.
+   El script creará un entorno virtual temporal, instalará PyInstaller, construirá el ejecutable y colocará el resultado en `dist/CuadernoAutomatico/` junto con un archivo `plantilla.env` y una guía `LEEME.txt` para la persona que lo reciba.
+
+3. Comprime la carpeta `dist/CuadernoAutomatico` y compártela. Indica a quien la reciba que:
+   - Copie `plantilla.env` como `.env` (en la misma carpeta) y edite los valores si necesita cambiar el puerto/modelo de LM Studio.
+   - Abra `CuadernoAutomatico.exe` para acceder a la interfaz gráfica sin instalar Python.
+
+> Sugerencia: antes de compartir, prueba el `.exe` en otra carpeta para comprobar que crea la subcarpeta `notes` y que puede comunicarse con tu instancia de LM Studio.
 
 ## Uso desde la terminal con Docker
 
@@ -103,6 +137,10 @@ Para entregar una experiencia "descargar y usar" debes incluir las versiones por
 
 2. Copia tu archivo de audio (mp3, wav, m4a, etc.) a `data/audio/`.
 3. Ejecuta el contenedor con Docker Compose, indicando la ruta del audio dentro del contenedor (`/app/audio/...`):
+## Uso básico
+
+1. Copia tu archivo de audio (mp3, wav, m4a, etc.) a `data/audio/`.
+2. Ejecuta el contenedor con Docker Compose, indicando la ruta del audio dentro del contenedor (`/app/audio/...`):
 
    ```bash
    docker compose run --rm class-notes /app/audio/mi_clase.mp3 --title "Álgebra Lineal" --date 2024-05-20
@@ -115,6 +153,7 @@ Para entregar una experiencia "descargar y usar" debes incluir las versiones por
    - `--skip-summary`: salta la llamada a LM Studio y solo crea la transcripción.
 
 4. Una vez finalizado, abre Obsidian y selecciona la carpeta `data/notes` como vault. Encontrarás:
+3. Una vez finalizado, abre Obsidian y selecciona la carpeta `data/notes` como vault. Encontrarás:
    - Notas por fecha en `data/notes/<año>/<mes>/<fecha>-<slug>.md` con el resumen.
    - Transcripciones detalladas en `data/notes/<año>/<mes>/transcripciones/` con tablas por segmento.
 
