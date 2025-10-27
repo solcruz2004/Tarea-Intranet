@@ -32,6 +32,7 @@ def get_settings() -> Settings:
     compute_type = _get_env("WHISPER_COMPUTE_TYPE", "auto")
     language = _get_env("WHISPER_LANGUAGE", "").strip() or None
     notes_root = Path(_get_env("NOTES_ROOT", "data/notes")).expanduser()
+    notes_root = Path(_get_env("NOTES_ROOT", "/app/notes")).expanduser()
 
     return Settings(
         lm_studio_base_url=base_url.rstrip("/"),
