@@ -68,6 +68,25 @@ Pensado para cualquier persona que prefiera dar clics en lugar de escribir coman
 
 > Consejo: crea un acceso directo a `start_gui.bat` (Windows) o un alias que ejecute `python3 main.py --gui` (macOS/Linux) para iniciar la app con doble clic siempre que tengas un nuevo audio.
 
+## Crear un ejecutable `.exe` listo para compartir
+
+Si quieres entregar la aplicación a alguien que solo necesite descargarla y abrirla, puedes generar una versión portable para Windows usando PyInstaller. Dentro del repositorio se incluye el script `packaging/windows/package_windows.bat` que automatiza todo el proceso:
+
+1. Abre una terminal de Windows (símbolo del sistema) y navega a la carpeta del proyecto.
+2. Ejecuta el script:
+
+   ```bat
+   packaging\windows\package_windows.bat
+   ```
+
+   El script creará un entorno virtual temporal, instalará PyInstaller, construirá el ejecutable y colocará el resultado en `dist/CuadernoAutomatico/` junto con un archivo `plantilla.env` y una guía `LEEME.txt` para la persona que lo reciba.
+
+3. Comprime la carpeta `dist/CuadernoAutomatico` y compártela. Indica a quien la reciba que:
+   - Copie `plantilla.env` como `.env` (en la misma carpeta) y edite los valores si necesita cambiar el puerto/modelo de LM Studio.
+   - Abra `CuadernoAutomatico.exe` para acceder a la interfaz gráfica sin instalar Python.
+
+> Sugerencia: antes de compartir, prueba el `.exe` en otra carpeta para comprobar que crea la subcarpeta `notes` y que puede comunicarse con tu instancia de LM Studio.
+
 ## Uso desde la terminal con Docker
 
 1. Asegúrate de que las carpetas compartidas existen (se crean automáticamente al correr Docker, pero puedes anticiparte):
