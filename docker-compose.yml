@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  class-notes:
+    build: .
+    container_name: class-notes
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - ./data/audio:/app/audio
+      - ./data/notes:/app/notes
+      - ./data/cache:/root/.cache
+    command: ["--help"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
