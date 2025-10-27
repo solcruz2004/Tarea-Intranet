@@ -31,6 +31,7 @@ def get_settings() -> Settings:
     whisper_model = _get_env("WHISPER_MODEL_SIZE", "small")
     compute_type = _get_env("WHISPER_COMPUTE_TYPE", "auto")
     language = _get_env("WHISPER_LANGUAGE", "").strip() or None
+    notes_root = Path(_get_env("NOTES_ROOT", "data/notes")).expanduser()
     notes_root = Path(_get_env("NOTES_ROOT", "/app/notes")).expanduser()
 
     return Settings(

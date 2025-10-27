@@ -18,6 +18,17 @@ El resultado se guarda como notas Markdown ordenadas por fecha dentro de un "cua
 ## Preparación del entorno
 
 1. Clona este repositorio y entra al directorio.
+2. Crea tu archivo `.env` a partir del ejemplo. Puedes hacerlo de dos formas:
+   - **Sin usar la terminal**: copia el archivo `.env.example`, pégalo en la misma carpeta y renómbralo como `.env`.
+   - **Con la terminal**:
+     ```bash
+     cp .env.example .env
+     ```
+3. Abre el nuevo `.env` y ajusta las variables según tus necesidades:
+   - `LM_STUDIO_BASE_URL`: apunta al servidor iniciado desde LM Studio. Si corres Docker en Linux, el valor `http://host.docker.internal:1234/v1` funciona al agregar el `extra_hosts` incluido en `docker-compose.yml`.
+   - `LM_STUDIO_MODEL`: nombre exacto del modelo cargado en LM Studio.
+   - Parámetros de Whisper (`WHISPER_MODEL_SIZE`, `WHISPER_COMPUTE_TYPE`, `WHISPER_LANGUAGE`).
+   - `NOTES_ROOT`: carpeta donde se guardarán las notas. Si usarás Docker deja `/app/notes`; para la interfaz gráfica local puedes usar `data/notes` o elegir cualquier ruta en tu equipo.
 2. Crea tu archivo `.env` a partir del ejemplo:
    ```bash
    cp .env.example .env
@@ -38,6 +49,35 @@ El resultado se guarda como notas Markdown ordenadas por fecha dentro de un "cua
 
 Estas carpetas se crean automáticamente, pero puedes ajustarlas en `docker-compose.yml`.
 
+## Primeros pasos sin usar la terminal (interfaz gráfica)
+
+Pensado para cualquier persona que prefiera dar clics en lugar de escribir comandos:
+
+1. Instala [Python 3.10 o superior](https://www.python.org/downloads/) y asegúrate de marcar la opción **Add Python to PATH** durante la instalación (en Windows). En macOS o Linux ya suele venir instalado.
+2. Completa la sección anterior de **Preparación del entorno** para dejar listo tu archivo `.env` y haber iniciado el servidor local de LM Studio con el modelo deseado.
+3. Abre la carpeta del proyecto y ejecuta la interfaz:
+   - En **Windows**, haz doble clic en `start_gui.bat`. El script instalará automáticamente las dependencias necesarias y abrirá la ventana de la aplicación.
+   - En **macOS o Linux**, abre una terminal únicamente para este paso, ejecuta `python3 -m pip install -r requirements.txt` la primera vez y luego `python3 main.py --gui` (puedes crear un alias o acceso directo para no repetir el comando).
+4. En la ventana "Cuaderno automático de clases":
+   - Pulsa **Buscar** para elegir el archivo de audio en cualquier carpeta.
+   - Cambia el **Título** o la **Fecha** si lo necesitas.
+   - Revisa la **Carpeta de notas** donde se guardarán los apuntes (por defecto `data/notes`). Puedes elegir otra ubicación con **Elegir carpeta**.
+   - Marca "Omitir resumen" solo si no quieres llamar a LM Studio y prefieres conservar únicamente la transcripción.
+5. Pulsa **Generar apuntes** y espera. El registro inferior te mostrará cada paso (carga del modelo, transcripción, resumen, guardado).
+6. Al finalizar se abrirá automáticamente la carpeta que contiene la nota y la transcripción completa para que la agregues a tu vault de Obsidian.
+
+> Consejo: crea un acceso directo a `start_gui.bat` (Windows) o un alias que ejecute `python3 main.py --gui` (macOS/Linux) para iniciar la app con doble clic siempre que tengas un nuevo audio.
+
+## Uso desde la terminal con Docker
+
+1. Asegúrate de que las carpetas compartidas existen (se crean automáticamente al correr Docker, pero puedes anticiparte):
+
+   ```bash
+   mkdir -p data/audio data/notes data/cache
+   ```
+
+2. Copia tu archivo de audio (mp3, wav, m4a, etc.) a `data/audio/`.
+3. Ejecuta el contenedor con Docker Compose, indicando la ruta del audio dentro del contenedor (`/app/audio/...`):
 ## Uso básico
 
 1. Copia tu archivo de audio (mp3, wav, m4a, etc.) a `data/audio/`.
@@ -53,6 +93,7 @@ Estas carpetas se crean automáticamente, pero puedes ajustarlas en `docker-comp
    - `--notes-root`: sobrescribe el destino de las notas si deseas guardarlas en otra carpeta.
    - `--skip-summary`: salta la llamada a LM Studio y solo crea la transcripción.
 
+4. Una vez finalizado, abre Obsidian y selecciona la carpeta `data/notes` como vault. Encontrarás:
 3. Una vez finalizado, abre Obsidian y selecciona la carpeta `data/notes` como vault. Encontrarás:
    - Notas por fecha en `data/notes/<año>/<mes>/<fecha>-<slug>.md` con el resumen.
    - Transcripciones detalladas en `data/notes/<año>/<mes>/transcripciones/` con tablas por segmento.
@@ -84,6 +125,14 @@ python main.py ruta/al/audio.mp3 --title "Mi clase" --date 2024-05-20
 
 Asegúrate de tener `ffmpeg` instalado y de exportar las variables necesarias.
 
+### Ejecución paso a paso (referencia rápida)
+
+1. Inicia LM Studio y habilita el servidor local compatible con OpenAI.
+2. Ajusta el archivo `.env` con la URL del servidor, el nombre del modelo y los parámetros de Whisper.
+3. Copia el audio a `data/audio/`.
+4. Corre `docker compose run --rm class-notes /app/audio/<archivo>` con los argumentos necesarios.
+5. Abre `data/notes` con Obsidian para revisar el resumen y la transcripción.
+
 ## Solución de problemas
 
 - **El contenedor no alcanza a LM Studio**: verifica que el servidor local esté activo y accesible. En Linux puede ser necesario editar `docker-compose.yml` para apuntar al IP de tu host.
@@ -91,3 +140,33 @@ Asegúrate de tener `ffmpeg` instalado y de exportar las variables necesarias.
 - **Obsidian no ve las notas**: confirma que estés abriendo la carpeta correcta (`data/notes`) y que los archivos `.md` se hayan generado.
 
 Con esta automatización tendrás un cuaderno digital actualizado automáticamente a partir de tus audios de clase, listo para revisar en cualquier momento.
+
+## Cómo subir el proyecto a GitHub
+
+1. [Crea un repositorio vacío](https://github.com/new) en tu cuenta de GitHub (sin README ni archivos iniciales).
+2. En tu máquina, autentícate en GitHub (por ejemplo con `gh auth login` o configurando una clave SSH) si aún no lo has hecho.
+3. Desde la carpeta del proyecto, añade el repositorio remoto y sube tu rama principal:
+
+   ```bash
+   git init              # solo si el proyecto no está inicializado
+   git add .
+   git commit -m "Primer commit"
+   git branch -M main
+   git remote add origin git@github.com:USUARIO/NOMBRE-REPO.git
+   git push -u origin main
+   ```
+
+   Sustituye `USUARIO/NOMBRE-REPO` por la ruta de tu repositorio.
+
+4. Cada vez que realices cambios:
+
+   ```bash
+   git add .
+   git commit -m "Descripción del cambio"
+   git push
+   ```
+
+5. Si trabajas con ramas y Pull Requests:
+   - Crea una rama (`git checkout -b feature/nueva-funcionalidad`).
+   - Haz tus cambios y súbelos (`git push -u origin feature/nueva-funcionalidad`).
+   - Abre un Pull Request en GitHub para revisar e integrar los cambios.

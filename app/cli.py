@@ -7,6 +7,8 @@ import logging
 from datetime import date, datetime
 from pathlib import Path
 
+from .logger import get_logger, setup_logging
+from .workflow import run_workflow
 from .config import get_settings
 from .logger import get_logger, setup_logging
 from .note_writer import prepare_paths, write_note
@@ -70,6 +72,18 @@ def main(args: list[str] | None = None) -> None:
     if not parsed.audio.exists():
         parser.error(f"El archivo {parsed.audio} no existe")
 
+    class_date = parse_date(parsed.date)
+    result = run_workflow(
+        audio_path=parsed.audio,
+        title=parsed.title,
+        class_date=class_date,
+        notes_root=parsed.notes_root,
+        skip_summary=parsed.skip_summary,
+    )
+
+    logger.info(
+        "\n¡Listo! Abre Obsidian en %s para revisar tus apuntes.", result.note_path.parent
+    )
     settings = get_settings()
     notes_root = parsed.notes_root or settings.notes_root
     notes_root.mkdir(parents=True, exist_ok=True)
