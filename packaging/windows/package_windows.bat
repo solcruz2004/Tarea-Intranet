@@ -65,6 +65,12 @@ if errorlevel 1 (
 echo === Copiando archivos auxiliares...
 copy /Y .env.windows.example dist\%APP_NAME%\plantilla.env >nul
 copy /Y packaging\windows\portable-readme.txt dist\%APP_NAME%\LEEME.txt >nul
+copy /Y docker-compose.yml dist\%APP_NAME%\docker-compose.yml >nul
+
+if exist packaging\windows\bundled (
+    echo === Integrando recursos portables (LM Studio, Obsidian, etc.)...
+    xcopy /E /I /Y "packaging\windows\bundled" "dist\%APP_NAME%\bundled" >nul
+)
 
 if exist dist\%APP_NAME%\CuadernoAutomatico.exe (
     echo.

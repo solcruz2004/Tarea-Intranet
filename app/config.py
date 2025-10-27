@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 import sys
 
+
 from dotenv import load_dotenv
 
 from .paths import APP_ROOT, resolve_app_path
@@ -39,6 +40,16 @@ class Settings:
     whisper_compute_type: str
     whisper_language: Optional[str]
     notes_root: Path
+    auto_bootstrap_services: bool
+    bootstrap_timeout_seconds: int
+    docker_compose_file: Optional[Path]
+    docker_compose_command: Optional[str]
+    lm_studio_start_command: Optional[str]
+    lm_studio_workdir: Optional[Path]
+    auto_launch_obsidian: bool
+    obsidian_vault: Path
+    obsidian_executable: Optional[Path]
+    gui_theme: str
 
 
 def get_settings() -> Settings:
@@ -60,6 +71,24 @@ def get_settings() -> Settings:
     notes_root = Path(notes_root_raw).expanduser()
     if not notes_root.is_absolute():
         notes_root = resolve_app_path(notes_root_raw)
+
+    compose_env = _get_env("DOCKER_COMPOSE_FILE", "").strip()
+    if compose_env:
+        compose_file = resolve_app_path(compose_env)
+    else:
+        default_compose = APP_ROOT / "docker-compose.yml"
+        compose_file = default_compose if default_compose.exists() else None
+
+    obsidian_vault_raw = _get_env("OBSIDIAN_VAULT", str(notes_root))
+    obsidian_vault = Path(obsidian_vault_raw).expanduser()
+    if not obsidian_vault.is_absolute():
+        obsidian_vault = resolve_app_path(obsidian_vault_raw)
+
+    obsidian_exec_raw = _get_env("OBSIDIAN_EXECUTABLE", "").strip()
+    obsidian_executable = resolve_app_path(obsidian_exec_raw) if obsidian_exec_raw else None
+
+    workdir_raw = _get_env("LM_STUDIO_WORKDIR", "").strip()
+    lm_studio_workdir = resolve_app_path(workdir_raw) if workdir_raw else None
     notes_root = Path(_get_env("NOTES_ROOT", "data/notes")).expanduser()
     notes_root = Path(_get_env("NOTES_ROOT", "/app/notes")).expanduser()
 
@@ -70,6 +99,16 @@ def get_settings() -> Settings:
         whisper_compute_type=compute_type,
         whisper_language=language,
         notes_root=notes_root,
+        auto_bootstrap_services=_get_bool("AUTO_BOOTSTRAP_SERVICES", True),
+        bootstrap_timeout_seconds=_get_int("BOOTSTRAP_TIMEOUT_SECONDS", 90),
+        docker_compose_file=compose_file,
+        docker_compose_command=_get_env("DOCKER_COMPOSE_COMMAND", "").strip() or None,
+        lm_studio_start_command=_get_env("LM_STUDIO_START_COMMAND", "").strip() or None,
+        lm_studio_workdir=lm_studio_workdir,
+        auto_launch_obsidian=_get_bool("AUTO_OPEN_OBSIDIAN", True),
+        obsidian_vault=obsidian_vault,
+        obsidian_executable=obsidian_executable,
+        gui_theme=_get_env("GUI_THEME", "superhero"),
     )
 
 
@@ -77,3 +116,20 @@ def _get_env(name: str, default: str) -> str:
     import os
 
     return os.getenv(name, default)
+
+
+def _get_bool(name: str, default: bool) -> bool:
+    raw = _get_env(name, "true" if default else "false").strip().lower()
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+def _get_int(name: str, default: int) -> int:
+    raw = _get_env(name, str(default)).strip()
+    try:
+        return int(raw)
+    except ValueError:
+        return default

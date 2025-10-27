@@ -8,6 +8,21 @@ Este proyecto permite convertir automáticamente cualquier archivo de audio en a
 
 El resultado se guarda como notas Markdown ordenadas por fecha dentro de un "cuaderno" (vault) que puedes abrir con Obsidian.
 
+La interfaz gráfica incluida verifica y arranca automáticamente todos los servicios necesarios (LM Studio, contenedores Docker y Obsidian portable) para que una persona sin conocimientos técnicos solo tenga que abrir el ejecutable, escoger un audio y pulsar **Generar apuntes automáticos**.
+
+## Requisitos previos
+
+### Para construir o ejecutar en modo desarrollo
+
+1. **Docker y Docker Compose** instalados en tu sistema.
+2. **LM Studio** en tu equipo local, con el servidor OpenAI-compatible habilitado.
+3. **Obsidian** si deseas abrir el vault generado directamente en tu máquina.
+4. (Opcional) GPU compatible para acelerar la transcripción; por defecto se usa CPU.
+
+### Para la persona que recibe el ejecutable portable
+
+- Ninguno: el `.zip` generado incluye los binarios portables de LM Studio y Obsidian junto con la automatización. Solo necesita descomprimirlo y abrir `CuadernoAutomatico.exe`.
+
 ## Requisitos previos
 
 1. **Docker y Docker Compose** instalados en tu sistema.
@@ -29,6 +44,8 @@ El resultado se guarda como notas Markdown ordenadas por fecha dentro de un "cua
    - `LM_STUDIO_MODEL`: nombre exacto del modelo cargado en LM Studio.
    - Parámetros de Whisper (`WHISPER_MODEL_SIZE`, `WHISPER_COMPUTE_TYPE`, `WHISPER_LANGUAGE`).
    - `NOTES_ROOT`: carpeta donde se guardarán las notas. Si usarás Docker deja `/app/notes`; para la interfaz gráfica local puedes usar `data/notes` o elegir cualquier ruta en tu equipo.
+   - `AUTO_BOOTSTRAP_SERVICES` y `LM_STUDIO_START_COMMAND`: permiten que la app intente arrancar LM Studio y Docker por ti (útil para la versión empaquetada).
+   - `OBSIDIAN_EXECUTABLE` y `AUTO_OPEN_OBSIDIAN`: controlan la apertura automática del vault cuando termina el procesamiento.
 2. Crea tu archivo `.env` a partir del ejemplo:
    ```bash
    cp .env.example .env
@@ -54,6 +71,12 @@ Estas carpetas se crean automáticamente, pero puedes ajustarlas en `docker-comp
 Pensado para cualquier persona que prefiera dar clics en lugar de escribir comandos:
 
 1. Instala [Python 3.10 o superior](https://www.python.org/downloads/) y asegúrate de marcar la opción **Add Python to PATH** durante la instalación (en Windows). En macOS o Linux ya suele venir instalado.
+2. Completa la sección anterior de **Preparación del entorno** para dejar listo tu archivo `.env`. Si defines `AUTO_BOOTSTRAP_SERVICES=true` y `LM_STUDIO_START_COMMAND`, la aplicación intentará iniciar LM Studio y Docker por ti; de lo contrario, enciende esos servicios manualmente antes de continuar.
+3. Abre la carpeta del proyecto y ejecuta la interfaz:
+   - En **Windows**, haz doble clic en `start_gui.bat`. El script instalará automáticamente las dependencias necesarias y abrirá la ventana de la aplicación.
+   - En **macOS o Linux**, abre una terminal únicamente para este paso, ejecuta `python3 -m pip install -r requirements.txt` la primera vez y luego `python3 main.py --gui` (puedes crear un alias o acceso directo para no repetir el comando).
+4. En la ventana "Asistente automático de apuntes":
+   - Observa el panel derecho; mostrará el estado de LM Studio, Docker y Obsidian en tiempo real.
 2. Completa la sección anterior de **Preparación del entorno** para dejar listo tu archivo `.env` y haber iniciado el servidor local de LM Studio con el modelo deseado.
 3. Abre la carpeta del proyecto y ejecuta la interfaz:
    - En **Windows**, haz doble clic en `start_gui.bat`. El script instalará automáticamente las dependencias necesarias y abrirá la ventana de la aplicación.
@@ -63,6 +86,8 @@ Pensado para cualquier persona que prefiera dar clics en lugar de escribir coman
    - Cambia el **Título** o la **Fecha** si lo necesitas.
    - Revisa la **Carpeta de notas** donde se guardarán los apuntes (por defecto `data/notes`). Puedes elegir otra ubicación con **Elegir carpeta**.
    - Marca "Omitir resumen" solo si no quieres llamar a LM Studio y prefieres conservar únicamente la transcripción.
+5. Pulsa **Generar apuntes automáticos** y espera. El registro inferior te mostrará cada paso (carga del modelo, transcripción, resumen, guardado).
+6. Al finalizar se abrirá Obsidian (si se configuró `AUTO_OPEN_OBSIDIAN=true`) y la carpeta que contiene la nota y la transcripción completa.
 5. Pulsa **Generar apuntes** y espera. El registro inferior te mostrará cada paso (carga del modelo, transcripción, resumen, guardado).
 6. Al finalizar se abrirá automáticamente la carpeta que contiene la nota y la transcripción completa para que la agregues a tu vault de Obsidian.
 
@@ -70,6 +95,15 @@ Pensado para cualquier persona que prefiera dar clics en lugar de escribir coman
 
 ## Crear un ejecutable `.exe` listo para compartir
 
+Para entregar una experiencia "descargar y usar" debes incluir las versiones portables de LM Studio, Obsidian y cualquier otro recurso necesario dentro del paquete. El script `packaging/windows/package_windows.bat` prepara todo automáticamente siempre que coloques dichos recursos en `packaging/windows/bundled/`.
+
+1. **Prepara los binarios portables**:
+   - Descarga la versión portable de [LM Studio](https://lmstudio.ai/) y cópiala dentro de `packaging/windows/bundled/lm-studio/`.
+   - Descarga [Obsidian portable](https://obsidian.md/download) y cópiala dentro de `packaging/windows/bundled/obsidian/`.
+   - Coloca cualquier otro recurso adicional (modelos predescargados, scripts personalizados, etc.) dentro de `packaging/windows/bundled/`.
+2. Revisa `.env.windows.example` y ajusta los valores por defecto que heredará la persona usuaria. El script copiará automáticamente ese archivo como `plantilla.env` en el directorio final.
+3. Abre una terminal de Windows (símbolo del sistema) y navega a la carpeta del proyecto.
+4. Ejecuta el script de empaquetado:
 Si quieres entregar la aplicación a alguien que solo necesite descargarla y abrirla, puedes generar una versión portable para Windows usando PyInstaller. Dentro del repositorio se incluye el script `packaging/windows/package_windows.bat` que automatiza todo el proceso:
 
 1. Abre una terminal de Windows (símbolo del sistema) y navega a la carpeta del proyecto.
@@ -79,6 +113,12 @@ Si quieres entregar la aplicación a alguien que solo necesite descargarla y abr
    packaging\windows\package_windows.bat
    ```
 
+   El script creará un entorno virtual temporal, instalará PyInstaller, compilará el ejecutable y copiará `docker-compose.yml`, `plantilla.env`, `LEEME.txt` y la carpeta `bundled/` con los recursos portables a `dist/CuadernoAutomatico/`.
+
+5. Comprueba el resultado abriendo `dist/CuadernoAutomatico/CuadernoAutomatico.exe`. Verás que el panel de servicios cambia a verde tras iniciar LM Studio y Docker embebidos.
+6. Comprime la carpeta `dist/CuadernoAutomatico` para compartirla. Quien la reciba solo tendrá que descomprimirla, revisar (si desea) el `.env` y ejecutar `CuadernoAutomatico.exe`.
+
+> Consejo: prueba el paquete en una máquina o usuario diferente antes de distribuirlo para verificar permisos de firewall y rutas relativas.
    El script creará un entorno virtual temporal, instalará PyInstaller, construirá el ejecutable y colocará el resultado en `dist/CuadernoAutomatico/` junto con un archivo `plantilla.env` y una guía `LEEME.txt` para la persona que lo reciba.
 
 3. Comprime la carpeta `dist/CuadernoAutomatico` y compártela. Indica a quien la reciba que:

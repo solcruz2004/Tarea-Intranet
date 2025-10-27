@@ -7,6 +7,10 @@ import logging
 from datetime import date, datetime
 from pathlib import Path
 
+from .config import get_settings
+from .logger import get_logger, setup_logging
+from .services import ServiceManager
+from .workflow import run_workflow
 from .logger import get_logger, setup_logging
 from .workflow import run_workflow
 from .config import get_settings
@@ -71,6 +75,15 @@ def main(args: list[str] | None = None) -> None:
 
     if not parsed.audio.exists():
         parser.error(f"El archivo {parsed.audio} no existe")
+
+    settings = get_settings()
+    service_manager = ServiceManager(settings)
+
+    def publish(status):
+        level = logging.INFO if status.ready else logging.WARNING
+        logger.log(level, "%s: %s", status.title, status.detail)
+
+    service_manager.bootstrap_services(callback=publish)
 
     class_date = parse_date(parsed.date)
     result = run_workflow(
