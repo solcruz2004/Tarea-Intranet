@@ -200,32 +200,3 @@ Asegúrate de tener `ffmpeg` instalado y de exportar las variables necesarias.
 
 Con esta automatización tendrás un cuaderno digital actualizado automáticamente a partir de tus audios de clase, listo para revisar en cualquier momento.
 
-## Cómo subir el proyecto a GitHub
-
-1. [Crea un repositorio vacío](https://github.com/new) en tu cuenta de GitHub (sin README ni archivos iniciales).
-2. En tu máquina, autentícate en GitHub (por ejemplo con `gh auth login` o configurando una clave SSH) si aún no lo has hecho.
-3. Desde la carpeta del proyecto, añade el repositorio remoto y sube tu rama principal:
-
-   ```bash
-   git init              # solo si el proyecto no está inicializado
-   git add .
-   git commit -m "Primer commit"
-   git branch -M main
-   git remote add origin git@github.com:USUARIO/NOMBRE-REPO.git
-   git push -u origin main
-   ```
-
-   Sustituye `USUARIO/NOMBRE-REPO` por la ruta de tu repositorio.
-
-4. Cada vez que realices cambios:
-
-   ```bash
-   git add .
-   git commit -m "Descripción del cambio"
-   git push
-   ```
-
-5. Si trabajas con ramas y Pull Requests:
-   - Crea una rama (`git checkout -b feature/nueva-funcionalidad`).
-   - Haz tus cambios y súbelos (`git push -u origin feature/nueva-funcionalidad`).
-   - Abre un Pull Request en GitHub para revisar e integrar los cambios.
