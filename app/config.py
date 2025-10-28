@@ -25,6 +25,10 @@ def _load_dotenv() -> None:
 
 _load_dotenv()
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 @dataclass
 class Settings:
@@ -53,6 +57,7 @@ def get_settings() -> Settings:
 
     default_base_url = "http://127.0.0.1:1234/v1"
     base_url = _get_env("LM_STUDIO_BASE_URL", default_base_url)
+    base_url = _get_env("LM_STUDIO_BASE_URL", "http://host.docker.internal:1234/v1")
     model = _get_env("LM_STUDIO_MODEL", "Meta-Llama-3-8B-Instruct")
     whisper_model = _get_env("WHISPER_MODEL_SIZE", "small")
     compute_type = _get_env("WHISPER_COMPUTE_TYPE", "auto")
@@ -84,6 +89,8 @@ def get_settings() -> Settings:
 
     workdir_raw = _get_env("LM_STUDIO_WORKDIR", "").strip()
     lm_studio_workdir = resolve_app_path(workdir_raw) if workdir_raw else None
+    notes_root = Path(_get_env("NOTES_ROOT", "data/notes")).expanduser()
+    notes_root = Path(_get_env("NOTES_ROOT", "/app/notes")).expanduser()
 
     return Settings(
         lm_studio_base_url=base_url.rstrip("/"),
