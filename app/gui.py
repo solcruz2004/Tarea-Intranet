@@ -16,6 +16,12 @@ from ttkbootstrap import Style
 
 from .config import get_settings
 from .services import ServiceManager, ServiceStatus
+from typing import Optional
+
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+
+from .config import get_settings
 from .workflow import WorkflowResult, run_workflow
 
 
@@ -49,6 +55,10 @@ class NotesApp:
         self.root.geometry("960x640")
         self.root.minsize(920, 620)
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
+        self.root = tk.Tk()
+        self.root.title("Cuaderno automático de clases")
+        self.root.geometry("720x520")
+        self.root.resizable(False, False)
 
         self.audio_path_var = tk.StringVar()
         self.title_var = tk.StringVar()
@@ -65,6 +75,9 @@ class NotesApp:
         self._build_ui()
         self._configure_logging()
         self._start_service_checks()
+
+        self._build_ui()
+        self._configure_logging()
 
     def run(self) -> None:
         self.root.mainloop()
@@ -110,6 +123,19 @@ class NotesApp:
 
         checkbox = ttk.Checkbutton(
             form_card,
+        main_frame = ttk.Frame(self.root, padding=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        form = ttk.Frame(main_frame)
+        form.pack(fill=tk.X, pady=(0, 20))
+
+        self._add_file_selector(form, "Archivo de audio", self.audio_path_var, 0)
+        self._add_entry(form, "Título de la clase", self.title_var, 1)
+        self._add_entry(form, "Fecha (YYYY-MM-DD)", self.date_var, 2)
+        self._add_folder_selector(form, "Carpeta de notas", self.notes_root_var, 3)
+
+        checkbox = ttk.Checkbutton(
+            form,
             text="Omitir resumen (solo guardar transcripción)",
             variable=self.skip_summary_var,
         )
@@ -131,6 +157,9 @@ class NotesApp:
             action_frame,
             text="Generar apuntes automáticos",
             bootstyle="success",
+        self.run_button = ttk.Button(
+            main_frame,
+            text="Generar apuntes",
             command=self._on_run_clicked,
         )
         self.run_button.pack(fill=tk.X)
@@ -148,12 +177,19 @@ class NotesApp:
             background=self.style.colors.input,
             foreground=self.style.colors.fg,
         )
+        self.progress = ttk.Progressbar(main_frame, mode="indeterminate")
+        self.progress.pack(fill=tk.X, pady=12)
+
+        ttk.Label(main_frame, text="Registro de actividad:").pack(anchor=tk.W)
+        self.log_text = tk.Text(main_frame, height=16, state=tk.DISABLED)
         self.log_text.pack(fill=tk.BOTH, expand=True)
 
     def _add_entry(self, parent: ttk.Frame, label: str, variable: tk.StringVar, row: int) -> None:
         ttk.Label(parent, text=label).grid(row=row, column=0, sticky=tk.W, pady=6)
         entry = ttk.Entry(parent, textvariable=variable)
         entry.grid(row=row, column=1, sticky=tk.EW, pady=6)
+        entry = ttk.Entry(parent, textvariable=variable, width=58)
+        entry.grid(row=row, column=1, sticky=tk.W, pady=6)
 
     def _add_file_selector(
         self, parent: ttk.Frame, label: str, variable: tk.StringVar, row: int
@@ -161,6 +197,8 @@ class NotesApp:
         ttk.Label(parent, text=label).grid(row=row, column=0, sticky=tk.W, pady=6)
         entry = ttk.Entry(parent, textvariable=variable)
         entry.grid(row=row, column=1, sticky=tk.EW, pady=6)
+        entry = ttk.Entry(parent, textvariable=variable, width=58)
+        entry.grid(row=row, column=1, sticky=tk.W, pady=6)
         ttk.Button(parent, text="Buscar", command=self._select_audio).grid(
             row=row, column=2, padx=(10, 0)
         )
@@ -171,6 +209,8 @@ class NotesApp:
         ttk.Label(parent, text=label).grid(row=row, column=0, sticky=tk.W, pady=6)
         entry = ttk.Entry(parent, textvariable=variable)
         entry.grid(row=row, column=1, sticky=tk.EW, pady=6)
+        entry = ttk.Entry(parent, textvariable=variable, width=58)
+        entry.grid(row=row, column=1, sticky=tk.W, pady=6)
         ttk.Button(parent, text="Elegir carpeta", command=self._select_folder).grid(
             row=row, column=2, padx=(10, 0)
         )
@@ -269,6 +309,8 @@ class NotesApp:
             message += "Obsidian se abrió con tu cuaderno."
         else:
             message += "Abre tu cuaderno en Obsidian para complementar los apuntes."
+            "Puedes abrir la carpeta de notas en Obsidian para revisar y complementar tus apuntes."
+        )
         messagebox.showinfo("Automatización completada", message)
         self._open_folder(result.note_path.parent)
 
