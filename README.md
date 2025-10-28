@@ -4,6 +4,20 @@ Esta guía explica, paso a paso, cómo cualquier persona puede instalar el progr
 
 ---
 
+## 0. ¿Cómo descargo el paquete `.zip`?
+
+Si alguien ya te envió el archivo por correo o en una memoria USB, puedes saltar al paso siguiente. Si todavía no tienes el `.zip`, sigue estos pasos para descargarlo desde GitHub:
+
+1. Abre tu navegador y entra al enlace que te compartieron (normalmente será algo como `https://github.com/<equipo>/<proyecto>/releases`).
+2. Busca la sección **Latest release** (Última versión).
+3. Dentro de **Assets** (Archivos incluidos) haz clic en el archivo que termina en `.zip`, por ejemplo `CuadernoAutomatico-portable.zip`.
+4. El navegador comenzará la descarga. Cuando termine, verás el archivo en la carpeta **Descargas**.
+5. Si Windows pregunta si quieres conservar el archivo, elige **Conservar** o **Mantener de todos modos**. Es seguro.
+
+> Consejo: si compartes el enlace con otra persona, envíale directamente la URL de la sección de releases para que también pueda descargar la versión más reciente.
+
+---
+
 ## 1. ¿Qué recibirás?
 
 Alguien te compartirá un archivo `.zip` llamado por ejemplo `CuadernoAutomatico.zip`. Dentro del `.zip` ya vienen:

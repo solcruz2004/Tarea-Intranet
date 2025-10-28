@@ -2,6 +2,13 @@
 Cuaderno automatico de clases (versión portable)
 ===============================================
 
+COMO DESCARGAR EL ARCHIVO .ZIP
+-------------------------------
+1. Abre en tu navegador el enlace de descargas del proyecto (por ejemplo `https://github.com/<equipo>/<proyecto>/releases`).
+2. Busca la sección **Latest release** y dentro de **Assets** haz clic en el archivo que termina en `.zip`.
+3. Guarda el archivo cuando el navegador te lo ofrezca. Estará en tu carpeta **Descargas**.
+4. Si Windows te avisa que podría ser peligroso, elige **Conservar** o **Mantener de todos modos**.
+
 INSTRUCCIONES RAPIDAS PARA LA PERSONA QUE RECIBE EL .ZIP
 -------------------------------------------------------
 1. Descomprime la carpeta completa donde prefieras (Documentos, Escritorio, etc.).
